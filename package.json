@@ -1,0 +1,13 @@
+{
+  "name": "ext-tabhiber",
+  "version": "0.1.0",
+  "description": "Manifest V3 browser extension that hibernates tab groups locally. Zero telemetry.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/smoke.mjs",
+    "lint": "node --check src/background.js && node --check src/popup.js && node --check src/storage.js"
+  },
+  "license": "MIT",
+  "author": "Matthew Chapin"
+}
