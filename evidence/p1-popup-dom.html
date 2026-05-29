@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <title>TabHiber</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <header>
+      <h1>TabHiber</h1>
+      <span class="tag">local-only</span>
+    </header>
+
+    <section class="actions">
+      <input id="group-name" placeholder="Group name (optional)">
+      <button id="btn-hibernate-window">Hibernate this window</button>
+    </section>
+
+    <section id="groups" aria-live="polite">
+      <p class="empty">No hibernated groups yet.</p>
+    </section>
+
+    <footer>
+      <button id="btn-export" class="linklike">Export JSON</button>
+      <button id="btn-import" class="linklike">Import JSON</button>
+      <a href="https://github.com/" target="_blank" class="linklike">Source</a>
+    </footer>
+
+    <dialog id="io-dialog">
+      <form method="dialog">
+        <h3 id="io-title">Export</h3>
+        <textarea id="io-text" rows="10" cols="50"></textarea>
+        <menu>
+          <button id="io-copy" type="button">Copy</button>
+          <button id="io-apply" type="button">Apply Import</button>
+          <button value="cancel">Close</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script type="module" src="popup.js"></script>
+  
+
+</body></html>

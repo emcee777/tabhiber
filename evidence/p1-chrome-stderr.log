@@ -1,0 +1,12 @@
+[88769:304240743:0529/140753.717114:INFO:components/enterprise/browser/controller/chrome_browser_cloud_management_controller.cc:238] No machine level policy manager exists.
+[88769:304240743:0529/140753.775847:WARNING:chrome/browser/ui/startup/google_chrome_scheme_util.cc:143] Headless mode requires the --allow-chrome-scheme-url command-line option to access chrome://extensions/
+[88769:304240743:0529/140754.163467:WARNING:chrome/browser/extensions/extension_service.cc:440] --disable-extensions-except is not allowed in Google Chrome, ignoring.
+[88769:304240743:0529/140754.277276:WARNING:chrome/browser/ui/startup/google_chrome_scheme_util.cc:143] Headless mode requires the --allow-chrome-scheme-url command-line option to access chrome://extensions/
+[88769:304240743:0529/140756.862115:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[88769:304240743:0529/140756.865910:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[88769:304240743:0529/140818.061811:ERROR:content/browser/gpu/gpu_process_host.cc:999] GPU process exited unexpectedly: exit_code=15
+[88769:304240743:0529/140818.062002:WARNING:content/browser/gpu/gpu_process_host.cc:1441] The GPU process has crashed 1 time(s)
+[88769:304240743:0529/140818.064457:WARNING:chrome/browser/ui/startup/google_chrome_scheme_util.cc:143] Headless mode requires the --allow-chrome-scheme-url command-line option to access chrome://extensions/
+[88769:304240743:0529/140818.065114:ERROR:content/browser/network_service_instance_impl.cc:703] Network service crashed or was terminated, restarting service.
+[90839:304247273:0529/140818.128352:ERROR:base/apple/mach_port_rendezvous_mac.cc:256] bootstrap_look_up com.google.Chrome.MachPortRendezvousServer.88769: Unknown service name (1102)
+[90839:304247273:0529/140818.131649:ERROR:base/memory/shared_memory_switch.cc:261] No rendezvous client, terminating process (parent died?)

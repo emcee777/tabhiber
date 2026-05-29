@@ -1,0 +1,130 @@
+P1 BROWSER-VERIFY TRANSCRIPT — ext-tabhiber
+worker: ext-tabhiber-cont-p1-w1-browser-verify
+date:   2026-05-29T18:00Z
+host:   macOS, Google Chrome 148.0.7778.179 (stable channel), Node v25.6.0
+mode:   hybrid — headless static + Chrome native MV3 validator + manual recipe
+
+============================================================
+CHECK 1 — existence (campaign-spec-checklist §7)
+============================================================
+  $ test -d /Users/matthewchapin/personal-os/projects/ext-tabhiber
+  DIR_OK
+  $ test -f .../manifest.json
+  MANIFEST_OK
+
+============================================================
+CHECK 2 — npm test  (storage-layer smoke, 11 assertions)
+============================================================
+  $ cd .../ext-tabhiber && npm test
+  > node tests/smoke.mjs
+  smoke.mjs: OK — all assertions passed
+  EXIT 0
+
+============================================================
+CHECK 3 — node --check (syntactic validity of all sources)
+============================================================
+  $ node --check src/background.js  → OK
+  $ node --check src/popup.js       → OK
+  $ node --check src/storage.js     → OK
+  $ npm run lint                    → exit 0
+
+============================================================
+CHECK 4 — manifest schema validator (custom node script)
+============================================================
+  Result: MANIFEST_SCHEMA_OK
+    manifest_version: 3
+    permissions: tabs, tabGroups, storage, activeTab  (all recognized MV3 perms)
+    action.default_popup: src/popup.html  (file exists)
+    background.service_worker: src/background.js (type: module)
+    icons: 16/48/128 all present, correct PNG dimensions
+    minimum_chrome_version: 120 (current stable is 148)
+
+============================================================
+CHECK 5 — Chrome native MV3 validator via --pack-extension
+============================================================
+  Setup: copied ext dir to a tmpdir, removed tests/ HANDOFF/SPEC/package.json/
+         to simulate the "production" zip layout per HANDOFF Next-Actions #6.
+
+  $ "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+      --pack-extension="$PACK_OUT/src-ext"
+  PACK_EXIT=0
+  Produced: src-ext.crx (9459 bytes, magic "Cr24" = CRX3) + src-ext.pem
+
+  Significance: if the manifest had any schema error, missing-file
+  reference, unknown permission, or invalid icon, Chrome would refuse
+  to pack and print an error.  Exit 0 means Chrome accepted everything.
+
+============================================================
+CHECK 6 — popup.html headless DOM render (Chrome --headless=new)
+============================================================
+  $ Chrome --headless=new --dump-dom file://.../src/popup.html
+  → evidence/p1-popup-dom.html (1246 bytes)
+
+  Static DOM checks against rendered output:
+    [OK] <h1>TabHiber</h1>
+    [OK] <span class="tag">local-only</span>
+    [OK] id="group-name" input
+    [OK] id="btn-hibernate-window"  "Hibernate this window"
+    [OK] id="groups" section
+    [OK] id="btn-export"
+    [OK] id="btn-import"
+    [OK] id="io-dialog"
+    [OK] id="io-text" textarea
+    [OK] empty-state literal "No hibernated groups yet"
+    [OK] <script type="module" src="popup.js"> tag present
+
+  Expected console error: CORS rejection on popup.js because file://
+  is not an allowed scheme for ES module imports.  This is the file://
+  loader limitation, NOT a code defect — under chrome-extension://
+  origin (where it ACTUALLY runs) the import resolves.
+
+============================================================
+CHECK 7 — failed attempt:  --load-extension headless harness
+============================================================
+  Tried: Chrome --headless=new --load-extension=$EXT_DIR --dump-dom
+         chrome://extensions
+  Chrome stderr: "--disable-extensions-except is not allowed in
+                  Google Chrome, ignoring."
+  Conclusion:    Chrome STABLE channel disables --load-extension and
+                 --disable-extensions-except. They work in Chromium /
+                 Canary / Chrome-for-Testing only. We therefore cannot
+                 headlessly exercise the service worker from a Google
+                 Chrome stable install.  Pack-extension (Check 5) is
+                 the strongest substitute available without installing
+                 Chromium or Playwright (~200 MB) on Matthew's box.
+
+============================================================
+CHECK 8 — message-wiring static audit (popup.js ↔ background.js)
+============================================================
+  popup.js outbound messages              background.js handlers
+    { type: "list" }                  ←→  case "list"                ✓
+    { type: "hibernateWindow", name } ←→  case "hibernateWindow"     ✓
+    { type: "restore", id, after }    ←→  case "restore"             ✓
+    { type: "delete", id }            ←→  case "delete"              ✓
+    { type: "export" }                ←→  case "export"              ✓
+    { type: "import", json }          ←→  case "import"              ✓
+  Also defined (no popup UI yet, per HANDOFF #5):
+                                          case "hibernateGroup"      —
+
+============================================================
+SUMMARY
+============================================================
+  PASSED, headlessly (cheap, deterministic):
+    - storage layer (npm test)
+    - JS syntax (3 files)
+    - MV3 manifest schema (custom + Chrome --pack-extension)
+    - popup.html DOM structure
+    - message routing wiring
+    - icons present and correct dimensions
+    - CRX3 production confirms shippability
+
+  NOT VERIFIED headlessly, requires Matthew's manual test:
+    - chrome.tabs.query/remove/create behavior (live tab capture)
+    - chrome.storage.local persistence across restarts
+    - popup → service worker round-trip under chrome-extension:// origin
+    - chrome.windows.create restoration flow
+    - <dialog> showModal() interaction (export/import textarea)
+
+  Recipe for the manual ~3-minute test:  see  p1-load-unpacked.md.
+
+NOTHING IN THE SOURCE WAS MODIFIED.  smoke test still green.
