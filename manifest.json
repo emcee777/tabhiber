@@ -2,9 +2,9 @@
   "manifest_version": 3,
   "name": "TabHiber",
   "short_name": "TabHiber",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hibernate tab groups locally. Zero telemetry. Zero account. Audit-ready in a single popup file.",
-  "permissions": ["tabs", "tabGroups", "storage", "activeTab"],
+  "permissions": ["tabs", "tabGroups", "storage"],
   "action": {
     "default_popup": "src/popup.html",
     "default_title": "TabHiber — Hibernate tabs"
