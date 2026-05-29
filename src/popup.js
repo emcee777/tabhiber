@@ -16,9 +16,53 @@ async function refresh() {
     p.className = "empty";
     p.textContent = "No hibernated groups yet.";
     host.appendChild(p);
+  } else {
+    for (const g of groups) host.appendChild(renderGroup(g));
+  }
+  await refreshTabGroups();
+}
+
+// Color names Chrome exposes via tabGroups.TabGroupColor.
+// Used as a fallback label when a tab group has no title.
+const COLOR_LABEL = {
+  grey: "Grey group", blue: "Blue group", red: "Red group",
+  yellow: "Yellow group", green: "Green group", pink: "Pink group",
+  purple: "Purple group", cyan: "Cyan group", orange: "Orange group",
+};
+
+async function refreshTabGroups() {
+  const section = $("#tab-groups");
+  const list = $("#tab-groups-list");
+  list.innerHTML = "";
+  if (!chrome.tabGroups || typeof chrome.tabGroups.query !== "function") {
+    section.hidden = true;
     return;
   }
-  for (const g of groups) host.appendChild(renderGroup(g));
+  let groups;
+  try {
+    const win = await chrome.windows.getCurrent();
+    groups = await chrome.tabGroups.query({ windowId: win.id });
+  } catch {
+    section.hidden = true;
+    return;
+  }
+  if (!groups || !groups.length) {
+    section.hidden = true;
+    return;
+  }
+  for (const g of groups) {
+    const btn = document.createElement("button");
+    const label = (g.title && g.title.trim()) || COLOR_LABEL[g.color] || "Tab group";
+    btn.textContent = `Hibernate: ${label}`;
+    btn.title = label;
+    btn.addEventListener("click", async () => {
+      const r = await send({ type: "hibernateGroup", tabGroupId: g.id, name: g.title || "" });
+      if (!r.ok) alert("Hibernate group failed: " + r.error);
+      else refresh();
+    });
+    list.appendChild(btn);
+  }
+  section.hidden = false;
 }
 
 function renderGroup(g) {

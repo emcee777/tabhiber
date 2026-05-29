@@ -2,7 +2,7 @@
 // Simulates chrome.storage.local with an in-memory Map.
 
 import assert from "node:assert/strict";
-import { makeStore, newGroup, assertValidGroup, uuid } from "../src/storage.js";
+import { makeStore, newGroup, assertValidGroup, uuid, dominantDomain } from "../src/storage.js";
 
 function memStorage() {
   const mem = new Map();
@@ -75,6 +75,49 @@ async function run() {
   // invalid import rejects
   await assert.rejects(() => store.importJSON("not json"));
   await assert.rejects(() => store.importJSON(JSON.stringify({ groups: "nope" })));
+
+  // dominantDomain — empty input returns null
+  assert.equal(dominantDomain([]), null);
+
+  // dominantDomain — picks most-common hostname
+  assert.equal(
+    dominantDomain([
+      { url: "https://github.com/a", title: "a" },
+      { url: "https://github.com/b", title: "b" },
+      { url: "https://example.com", title: "c" },
+    ]),
+    "github.com",
+  );
+
+  // dominantDomain — ignores internal chrome:// pages
+  assert.equal(
+    dominantDomain([
+      { url: "chrome://newtab", title: "x" },
+      { url: "chrome://newtab", title: "y" },
+      { url: "https://example.com/a", title: "z" },
+    ]),
+    "example.com",
+  );
+
+  // dominantDomain — all-internal returns null
+  assert.equal(
+    dominantDomain([
+      { url: "chrome://newtab", title: "x" },
+      { url: "chrome-extension://abc/page.html", title: "y" },
+      { url: "about:blank", title: "z" },
+    ]),
+    null,
+  );
+
+  // newGroup auto-names from dominant domain when name omitted
+  const autoNamed = newGroup("", [
+    { url: "https://news.ycombinator.com/", title: "HN" },
+    { url: "https://news.ycombinator.com/item?id=1", title: "Item" },
+  ]);
+  assert.ok(
+    autoNamed.name.startsWith("news.ycombinator.com"),
+    `expected dominant-domain auto-name, got: ${autoNamed.name}`,
+  );
 
   console.log("smoke.mjs: OK — all assertions passed");
 }

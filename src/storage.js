@@ -77,9 +77,14 @@ export function assertValidGroup(g) {
 }
 
 export function newGroup(name, tabs) {
+  let auto = null;
+  if (!name) {
+    const dom = dominantDomain(tabs);
+    if (dom) auto = `${dom} (${tabs.length} tab${tabs.length === 1 ? "" : "s"})`;
+  }
   return {
     id: uuid(),
-    name: name || defaultName(),
+    name: name || auto || defaultName(),
     createdAt: Date.now(),
     tabs: tabs.map((t) => ({
       url: t.url,
@@ -87,6 +92,36 @@ export function newGroup(name, tabs) {
       favIconUrl: t.favIconUrl,
     })),
   };
+}
+
+/**
+ * Return the most-common hostname across tabs, or null if none.
+ * Skips chrome://, chrome-extension://, about: URLs (internal pages).
+ * Pure local computation — zero network egress.
+ * @param {{url:string}[]} tabs
+ * @returns {string|null}
+ */
+export function dominantDomain(tabs) {
+  if (!Array.isArray(tabs) || tabs.length === 0) return null;
+  const counts = new Map();
+  for (const t of tabs) {
+    if (!t || typeof t.url !== "string") continue;
+    const u = t.url;
+    if (u.startsWith("chrome://") || u.startsWith("chrome-extension://") || u.startsWith("about:")) {
+      continue;
+    }
+    let host;
+    try { host = new URL(u).hostname; } catch { continue; }
+    if (!host) continue;
+    counts.set(host, (counts.get(host) || 0) + 1);
+  }
+  if (counts.size === 0) return null;
+  let best = null;
+  let bestN = 0;
+  for (const [h, n] of counts) {
+    if (n > bestN) { best = h; bestN = n; }
+  }
+  return best;
 }
 
 export function defaultName(d = new Date()) {

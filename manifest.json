@@ -13,6 +13,12 @@
     "service_worker": "src/background.js",
     "type": "module"
   },
+  "commands": {
+    "hibernate-current-window": {
+      "suggested_key": { "default": "Ctrl+Shift+H", "mac": "Command+Shift+H" },
+      "description": "Hibernate the current window into a new group"
+    }
+  },
   "icons": {
     "16": "src/icons/icon16.png",
     "48": "src/icons/icon48.png",

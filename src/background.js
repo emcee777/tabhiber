@@ -11,6 +11,19 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   return true; // async
 });
 
+// Keyboard shortcut: route the configured command to the current window
+// through the same hibernateWindow handler the popup uses. Default name = ""
+// so the dominant-domain auto-namer in newGroup() takes over.
+chrome.commands?.onCommand.addListener(async (command) => {
+  if (command !== "hibernate-current-window") return;
+  try {
+    const result = await handle({ type: "hibernateWindow", name: "" });
+    if (!result.ok) console.warn("[tabhiber] shortcut hibernate failed:", result.error);
+  } catch (err) {
+    console.error("[tabhiber] shortcut error", err);
+  }
+});
+
 async function handle(msg) {
   switch (msg?.type) {
     case "list":

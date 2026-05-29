@@ -59,6 +59,28 @@ button:hover { background: #f0f0f0; }
   font-weight: 600;
 }
 
+#tab-groups {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+#tab-groups h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+#tab-groups-list { display: flex; flex-wrap: wrap; gap: 4px; }
+#tab-groups-list button {
+  font-size: 11px;
+  padding: 3px 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 #groups { max-height: 360px; overflow-y: auto; padding: 6px 12px; }
 #groups .empty {
   color: var(--muted);
